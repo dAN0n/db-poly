@@ -7,4 +7,6 @@
 *.synctex.gz
 *.toc
 *.bib.bak
+*.fdb_latexmk
+*.fls
 ER/tex/*.pdf
