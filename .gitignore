@@ -11,3 +11,7 @@
 *.fls
 ER/tex/*.pdf
 DDL/tex/*.pdf
+DML/tex/*.pdf
+SP/tex/*.pdf
+Transactions/tex/*.pdf
+Triggers/tex/*.pdf

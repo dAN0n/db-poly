@@ -1,0 +1,8 @@
+-- Создание трека с самым большим временем и его удаление
+CREATE OR ALTER PROCEDURE t11 AS
+BEGIN
+    INSERT INTO TRACKS VALUES ((SELECT MAX(TRACK_ID) FROM TRACKS)+1, 1, 'TEST', '23:59:59');
+    DELETE FROM TRACKS WHERE DURATION=(SELECT MAX(DURATION) FROM TRACKS);
+END
+-- Завершение транзакции
+COMMIT;
