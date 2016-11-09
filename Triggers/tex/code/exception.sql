@@ -1,0 +1,1 @@
+CREATE OR ALTER EXCEPTION ISCOPY 'This entry is already exist!';

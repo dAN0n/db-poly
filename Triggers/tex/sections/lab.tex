@@ -1,0 +1,51 @@
+% !TEX root = ../Triggers_report.tex
+\section{Ход работы}
+
+\subsection{Триггер для автоматического заполнения ключевого поля}
+
+Реализовать триггер автоинкремента первичного ключа можно различными методами, приведем два варианта:
+
+\begin{enumerate}
+	\item С использованием генератора:
+
+	\lstinputlisting[language=SQL, morekeywords={REFERENCES, to, PROCEDURE, BEGIN, DECLARE, VARIABLE, IF, FOR, DO, SUSPEND, SEQUENCE, RESTART, WITH}]{code/gen.sql}
+
+	Создадим триггер для таблицы SELLING:
+
+	\lstinputlisting[language=SQL, morekeywords={REFERENCES, to, PROCEDURE, BEGIN, DECLARE, VARIABLE, IF, FOR, DO, SUSPEND, ACTIVE, BEFORE}]{code/autoinc.sql}
+
+	Следует отметить, что в данной реализации генератор будет увеличиваться даже в том случае, когда добавление записей было отменено командой ROLLBACK. В случае, если создаваемый ID уже существует в таблице, триггер создаёт новый до тех пор, пока не достигнет уникального. \\
+	
+	\item С нахождением максимального значения первичного ключа
+
+	Создадим триггер для таблицы ARTISTS:
+
+	\lstinputlisting[language=SQL, morekeywords={REFERENCES, to, PROCEDURE, BEGIN, DECLARE, VARIABLE, IF, FOR, DO, SUSPEND, ACTIVE, BEFORE}]{code/autoinc2.sql}
+
+	Преимуществом данного варианта является однозначное значение первичного ключа (максимальное значение в таблице + 1).
+\end{enumerate}
+
+
+\subsection{Триггер контроля целостности данных в подчиненной таблице при удалении/изменении записей в главной таблице}
+
+Так как все связи между таблицами в разработанной схеме БД определены через связи PK$\Leftarrow$FK, а действие на обновление ограничений (CONSTRAINTS) не было определено, то изменить первичный ключ в главной таблице, пока на нее ссылаются подчиненные, невозможно. Поэтому триггер учитывает только удаление записей в таблице AWARDS:
+
+\lstinputlisting[language=SQL, morekeywords={REFERENCES, to, PROCEDURE, BEGIN, DECLARE, VARIABLE, IF, FOR, DO, SUSPEND, ACTIVE, BEFORE}]{code/awardctl.sql}
+
+\subsection{Реализовать триггеры, не позволяющие несколько раз добавить трек в плейлист и альбом}
+
+Для создания данных триггеров предварительно создадим исключение:
+
+\lstinputlisting[language=SQL, morekeywords={REFERENCES, to, PROCEDURE, BEGIN, DECLARE, VARIABLE, IF, FOR, DO, SUSPEND, ACTIVE, BEFORE}]{code/exception.sql}
+
+Проверка дублирования для плейлистов:
+
+\lstinputlisting[language=SQL, morekeywords={REFERENCES, to, PROCEDURE, BEGIN, DECLARE, VARIABLE, IF, FOR, DO, SUSPEND, ACTIVE, BEFORE}]{code/plnotcopy.sql}
+
+Проверка дублирования для треков в альбомах:
+
+\lstinputlisting[language=SQL, morekeywords={REFERENCES, to, PROCEDURE, BEGIN, DECLARE, VARIABLE, IF, FOR, DO, SUSPEND, ACTIVE, BEFORE}]{code/trknotcopy.sql}
+
+\subsection{При добавлении новых данных в таблицу продаж альбомов запускать пересчет агрегатов по окончившемуся периоду: если последняя запись в таблицу продаж была добавлена до окончания очередного агрегационного этапа, а добавляемая --- после, то запускать процедуру пересчета для окончившегося периода}
+
+\lstinputlisting[language=SQL, morekeywords={REFERENCES, to, PROCEDURE, BEGIN, DECLARE, VARIABLE, IF, FOR, DO, SUSPEND, ACTIVE, BEFORE, DATEDIFF}]{code/aggregate.sql}
