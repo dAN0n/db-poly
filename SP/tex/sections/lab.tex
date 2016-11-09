@@ -1,0 +1,16 @@
+% !TEX root = ../SP_report.tex
+\section{Ход работы}
+
+\subsection{Реализовать процедуру выдачи награды за самый популярный по продажам альбом: за заданный период вычислять самый продаваемый альбом и выдавать ему награду заданного типа}
+
+\lstinputlisting[language=SQL, morekeywords={REFERENCES, to, PROCEDURE, DECLARE, VARIABLE, BEGIN}]{code/ind1.sql}
+
+\subsection{Реализовать процедуру вычисления агрегатов --- сумму продаж по дням, неделям, месяцам, годам, городам, странам. Для хранения вычисленных значений необходимо создать отдельную таблицу.}
+
+Для хранения вычисленных значений создадим по таблице для каждого агрегата:
+
+\lstinputlisting[language=SQL, morekeywords={REFERENCES, to, PROCEDURE, BEGIN, DECLARE, VARIABLE, IF, FOR, DO, SUSPEND}]{code/ind2_t.sql}
+
+Реализованная процедура:
+
+\lstinputlisting[language=SQL, morekeywords={REFERENCES, to, PROCEDURE, BEGIN, DECLARE, VARIABLE, IF, FOR, DO, SUSPEND}]{code/ind2.sql}
