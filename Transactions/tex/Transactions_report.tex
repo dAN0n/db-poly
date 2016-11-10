@@ -1,0 +1,45 @@
+% НЕ ЗАБЫВАЙТЕ МЕНЯТЬ ИМЯ ОСНОВНОГО ФАЙЛА В ПЕРВЫХ СТРОЧКАХ ВКЛЮЧАЕМЫХ ФАЙЛОВ,
+% ЭТО УПРОЩАЕТ НАВИГАЦИЮ И РАБОТУ С ПРОЕКТОМ, НО ДЕЛАТЬ ЭТО НЕОБЯЗАТЕЛЬНО
+\documentclass[oneside,final,14pt]{extarticle}				% Тип документа
+
+\usepackage{silence}										% Скрывает предупреждения
+\WarningFilter{latex}{You have requested package}			% Скрытие предупреждения об использовании собственного стилевого файла
+
+\usepackage{sty/SPbSTUreports}								% Стилевой файл
+
+%% ЗАПОЛНЕНИЕ ТИТУЛЬНОГО ЛИСТА %%
+\university{Санкт-Петербургский государственный политехнический \\ университет Петра Великого}
+% \faculty{}
+\department{Кафедра компьютерных систем и программных технологий}
+\student{Д. А. Зобков}
+% \studentt{}
+\group{43501/3}
+\teacher{А. В. Мяснов}
+% \teacherr{}
+\papertype{лабораторной работе}
+\lessontype{Базы данных}
+\theme{Изучение работы транзакций}
+% \variant[~\textnumero]{2}
+% \titleright{45}
+\wordfont													% При наличии используются шрифты PSCyr и шрифт математики Times New Roman стиля (в XeTeX только математика)
+
+%% ДЛЯ XETEX %%
+% \newfontfamily{\cyrillicfont}{Times New Roman}
+% \setmainfont[Ligatures={TeX,Historic}]{Times New Roman}	% Задаёт основной шрифт документа
+% \newfontfamily{\cyrillicfontsf}{Arial}
+% \setsansfont{Arial}										% Задаёт шрифт без засечек
+% \newfontfamily{\cyrillicfonttt}{Courier New}
+% \setmonofont{Courier New}									% Задаёт моноширинный шрифт
+
+% \includeonly{}											% Компиляция части отчета
+
+\begin{document}
+
+	\maketitle												% Генерация титульного листа
+	% \toc													% Генерация оглавления
+
+	\include*{sections/goaltask}							% Цель работы/Постановка задачи
+	\include*{sections/lab}									% Ход работы
+	\include*{sections/conclusion}							% Выводы
+
+\end{document}

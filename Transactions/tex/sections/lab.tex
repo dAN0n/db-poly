@@ -1,0 +1,67 @@
+% !TEX root = ../Transactions_report.tex
+\section{Ход работы}
+
+\subsection{Изучить основные принципы работы транзакций}
+
+Транзакция --- задача с определенными характеристиками, включающая любое количество различных операций (SELECT, INSERT, UPDATE, или DELETE) над данными в БД. Транзакция должна рассматриваться как единая операция над данными, т.е. она выполняется либо полностью, либо никак. Так как возможны случаи возникновения ошибок во время выполнения транзакции, приводящих к невозможности ее закончить, необходимы особые операции для подтверждения (COMMIT) или отмены транзакции (ROLLBACK).
+
+Все выполняемые транзакции должны удовлетворять следующим свойствам (ACID критериям): 
+
+\begin{itemize}
+ 	\item \emph{Атомарность.} Выполнение по принципу "`все или ничего"';
+ 	\item \emph{Согласованность.} В результате транзакции система переходит из одного абстрактного корректного состояния в другое;
+ 	\item \emph{Изолированность.} Данные, находящиеся в несогласованном состоянии, не должны быть видны другим транзакциям, пока изменения не будут завершены;
+ 	\item \emph{Долговечность.} Если транзакция зафиксирована, то ее результаты должны быть долговечными. Новые состояния всех объектов сохранятся даже в случае аппаратных или системных сбоев.  
+ \end{itemize}  
+
+Транзакция обычно начинается автоматически при подключении клиента к БД и продолжается до выполнения команд COMMIT или ROLLBACK, либо до отключения клиента или сбоя сервера.
+
+\subsection{Провести эксперименты по запуску, подтверждению и откату транзакций}
+
+Рассмотрим команды COMMIT и ROLLBACK на примере добавления записей в таблицу: 
+
+\lstinputlisting[language=SQL, morekeywords={REFERENCES, to, PROCEDURE, BEGIN, DECLARE, VARIABLE, IF, FOR, DO, SUSPEND, ACTIVE, BEFORE, DATEDIFF, SAVEPOINT}, deletekeywords=FIRST]{code/1.sql}
+
+\subsection{Разобраться с уровнями изоляции транзакций в Firebird}
+
+Каждая транзакция имеет свой уровень изоляции, который устанавливается при запуске и остается неизменным в течение всей ее жизни. Firebird SQL предусматривает 3 уровня изоляции:
+
+\begin{itemize}
+	\item \emph{READ COMMITTED} ("`читать подтвержденные данные"') \\
+
+	Уровень изоляции READ COMMITTED используется, когда мы хотим видеть все подтвержденные результаты параллельно выполняющихся (в рамках других транзакций) действий. Этот уровень изоляции гарантирует, что мы не сможем прочитать неподтвержденные данные, измененные в других транзакциях, и делает возможным прочитать подтвержденные данные. \\
+
+	\item \emph{SNAPSHOT} ("`моментальный снимок"') \\
+
+	Этот уровень изоляции используется для создания "`моментального"' снимка базы  данных. Все операции чтения данных, выполняемые в рамках транзакции с уровнем изоляции SNAPSHOT, будут видеть только состояние базы данных на момент начала запуска транзакции. Все изменения, сделанные в параллельных транзакциях, не видны в этой транзакции. В то же время SNAPSHOT не блокирует данные, которые он не изменяет. \\
+
+	\item \emph{SNAPSHOT TABLE STABILITY} \\
+
+	Это уровень изоляции также создает "`моментальный"' снимок базы данных, но одновременно блокирует на запись данные, задействованные в операциях, выполняемые данной транзакцией. Это означает, что если транзакция SNAPSHOT TABLE STABILITY изменила данные в какой-нибудь таблице, то после этого данные в этой таблице уже не могут быть изменены в других параллельных транзакциях. Кроме того, транзакции с уровнем изоляции SNAPSHOT TABLE STABILITY не могут получить доступ к таблице, если данные в них уже изменяются в контексте других транзакций.
+\end{itemize} 
+
+\subsection{Спланировать и провести эксперименты, показывающие основные возможности транзакций с различным уровнем изоляции}
+
+\subsubsection{READ COMMITED}
+
+\lstinputlisting[language=SQL, morekeywords={REFERENCES, to, PROCEDURE, BEGIN, DECLARE, VARIABLE, IF, FOR, DO, SUSPEND, ACTIVE, BEFORE, DATEDIFF, SAVEPOINT, SNAPSHOT, STABILITY}, deletekeywords=FIRST, caption=Терминал 1 (READ COMMITED)]{code/rc1.sql}
+
+\lstinputlisting[language=SQL, morekeywords={REFERENCES, to, PROCEDURE, BEGIN, DECLARE, VARIABLE, IF, FOR, DO, SUSPEND, ACTIVE, BEFORE, DATEDIFF, SAVEPOINT}, deletekeywords=FIRST, caption=Терминал 2]{code/rc2.sql}
+
+В ходе эксперимента выполняем неподтвержденное изменение данных таблицы AWARDS. При этом параллельно выполняется транзакция с уровнем изоляции READ COMMITTED, содержащая запрос SELECT. Транзакция не выполняется ("`зависает"'), т.к. она обращается к неподтвержденным данным, но после подтверждения изменения мы увидим измененное содержимое таблицы. 
+
+\subsubsection{SNAPSHOT}
+
+\lstinputlisting[language=SQL, morekeywords={REFERENCES, to, PROCEDURE, BEGIN, DECLARE, VARIABLE, IF, FOR, DO, SUSPEND, ACTIVE, BEFORE, DATEDIFF, SAVEPOINT, SNAPSHOT, STABILITY}, deletekeywords=FIRST, caption=Терминал 1 (SNAPSHOT)]{code/s1.sql}
+
+\lstinputlisting[language=SQL, morekeywords={REFERENCES, to, PROCEDURE, BEGIN, DECLARE, VARIABLE, IF, FOR, DO, SUSPEND, ACTIVE, BEFORE, DATEDIFF, SAVEPOINT}, deletekeywords=FIRST, caption=Терминал 2]{code/s2.sql}
+
+Видим, что транзакция, содержащая SELECT, вывела "`старые"' данные, подтвержденные на момент старта транзакции. При таком уровне изоляции даже подтвержденные изменения данных из других транзакций не видны. Можно заметить, что при изменении данных в рамках сделанного снимка базы возникает конфликт между двумя транзакциями. В конечном итоге в силу вступили изменения из второго терминала. 
+
+\subsubsection{SNAPSHOT TABLE STABILITY}
+
+\lstinputlisting[language=SQL, morekeywords={REFERENCES, to, PROCEDURE, BEGIN, DECLARE, VARIABLE, IF, FOR, DO, SUSPEND, ACTIVE, BEFORE, DATEDIFF, SAVEPOINT, SNAPSHOT, STABILITY}, deletekeywords=FIRST, caption=Терминал 1 (SNAPSHOT TABLE STABILITY)]{code/sts1.sql}
+
+\lstinputlisting[language=SQL, morekeywords={REFERENCES, to, PROCEDURE, BEGIN, DECLARE, VARIABLE, IF, FOR, DO, SUSPEND, ACTIVE, BEFORE, DATEDIFF, SAVEPOINT}, deletekeywords=FIRST, caption=Терминал 2]{code/sts2.sql}
+
+Также, как и в предыдущем случае, возник конфликт между двумя транзакциями, но в этот раз транзакция с уровнем изоляции SNAPSHOT TABLE STABILITY запретила изменение таблицы из других транзакций. В этом случае в силу вступили изменения первого терминала. 
